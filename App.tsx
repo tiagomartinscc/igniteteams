@@ -1,4 +1,5 @@
-import { Groups } from './src/screens/Groups';
+import React from 'react'
+import { Groups } from '@screens/Groups'
 
 export default function App() {
   return (
