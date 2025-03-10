@@ -8,7 +8,7 @@ import { NewGroup } from '@screens/NewGroup'
 
 export function AppRoutes() {
   return (
-    <Navigator>
+    <Navigator screenOptions={{ headerShown: false}}>
       <Screen 
         name='groups'
         component={Groups}
