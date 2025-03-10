@@ -8,10 +8,12 @@ import { ButtonIcon } from "@components/ButtonIcon"
 import { Input } from "@components/Input"
 import { Filter } from "@components/Filter"
 import { PlayerCard } from "@components/PlayerCard"
+import { ListEmpty } from '@components/ListEmpty'
+import { Button } from '@components/Button'
 
 export function Players() {
   const [team, setTeam] = useState('Time A')
-  const [players, setPlayers] = useState(['Tiago', 'Vini'])
+  const [players, setPlayers] = useState([])
   return (
     <Container>
       <Header showBackButton />
@@ -52,12 +54,27 @@ export function Players() {
     <FlatList 
       data={players}
       keyExtractor={item => item}
+      ListEmptyComponent={() => (
+        <ListEmpty 
+          message="Não há pessoas neste time." 
+        />
+      )}
       renderItem={({ item }) => (
         <PlayerCard 
           onRemove={() => {}}
           name={item}
         />
       )}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={[
+        {paddingBottom: 100},
+        players.length === 0 && {flex: 1}
+      ]}
+    />
+
+    <Button 
+      title='Remover Turma'
+      type='SECONDARY'
     />
     </Container>
   )
