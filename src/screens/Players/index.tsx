@@ -12,6 +12,7 @@ import { AppError } from '@utils/AppError'
 
 import { Container, Form, HeaderList, NumberOfPlayers } from "./styles"
 
+import { Loading } from '@components/Loading'
 import { Header } from "@components/Header"
 import { Highlight } from "@components/Highlight"
 import { ButtonIcon } from "@components/ButtonIcon"
@@ -26,6 +27,7 @@ type RouteParams = {
 }
 
 export function Players() {
+  const [isLoading, setIsLoading] = useState(true)
   const [newPlayerName, setNewPlayerName] = useState('')
   const [team, setTeam] = useState('Time A')
   const [players, setPlayers] = useState<PlayerStorageDTO[]>([])
@@ -60,8 +62,10 @@ export function Players() {
 
   async function fetchPlayersByTeam() {
     try {
+      setIsLoading(true)
       const playersByTeam = await playersGetByGroupAndTeam(group, team)
       setPlayers(playersByTeam)
+      setIsLoading(false)
     } catch (error) {
       if (error instanceof AppError) {
         Alert.alert('Lista pessoas', error.message);
@@ -154,26 +158,29 @@ export function Players() {
         </NumberOfPlayers>
     </HeaderList>
 
-    <FlatList 
-      data={players}
-      keyExtractor={item => item.name}
-      ListEmptyComponent={() => (
-        <ListEmpty 
-          message="Não há pessoas neste time." 
-        />
-      )}
-      renderItem={({ item }) => (
-        <PlayerCard 
-          onRemove={() => handlePlayerRemove(item.name)}
-          name={item.name}
-        />
-      )}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={[
-        {paddingBottom: 100},
-        players.length === 0 && {flex: 1}
-      ]}
-    />
+    {
+      isLoading ? <Loading  /> :
+      <FlatList 
+        data={players}
+        keyExtractor={item => item.name}
+        ListEmptyComponent={() => (
+          <ListEmpty 
+            message="Não há pessoas neste time." 
+          />
+        )}
+        renderItem={({ item }) => (
+          <PlayerCard 
+            onRemove={() => handlePlayerRemove(item.name)}
+            name={item.name}
+          />
+        )}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          {paddingBottom: 100},
+          players.length === 0 && {flex: 1}
+        ]}
+      />
+    }
 
     <Button 
       title='Remover Turma'
