@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRoute } from '@react-navigation/native'
 import { Alert, FlatList } from 'react-native'
 
 import { playerAddByGroup } from '@storage/players/playerAddByGroup'
+import { playersGetByGroupAndTeam } from '@storage/players/playersGetByGroupAndTeam'
+
 import { AppError } from '@utils/AppError'
 
 import { Container, Form, HeaderList, NumberOfPlayers } from "./styles"
@@ -15,7 +17,7 @@ import { Filter } from "@components/Filter"
 import { PlayerCard } from "@components/PlayerCard"
 import { ListEmpty } from '@components/ListEmpty'
 import { Button } from '@components/Button'
-import { playersGetByGroup } from '@storage/players/playersGetByGroup'
+import { PlayerStorageDTO } from '@storage/players/PlayerStorageDTO'
 
 type RouteParams = {
   group: string
@@ -24,7 +26,7 @@ type RouteParams = {
 export function Players() {
   const [newPlayerName, setNewPlayerName] = useState('')
   const [team, setTeam] = useState('Time A')
-  const [players, setPlayers] = useState([])
+  const [players, setPlayers] = useState<PlayerStorageDTO[]>([])
   const route = useRoute()
   const { group } = route.params as RouteParams
 
@@ -39,8 +41,7 @@ export function Players() {
 
     try {
       await playerAddByGroup(newPlayer, group)
-      const players = await playersGetByGroup(group)
-      console.log(players)
+      await fetchPlayersByTeam();
     } catch (error) {
       if (error instanceof AppError) {
         Alert.alert('Nova pessoa', error.message);
@@ -50,6 +51,24 @@ export function Players() {
       }
     }
   }
+
+  async function fetchPlayersByTeam() {
+    try {
+      const playersByTeam = await playersGetByGroupAndTeam(group, team)
+      setPlayers(playersByTeam)
+    } catch (error) {
+      if (error instanceof AppError) {
+        Alert.alert('Lista pessoas', error.message);
+      } else {
+        console.log(error)
+        Alert.alert('Lista pessoas', `Não foi possível listar o time ${team}`);
+      }      
+    }
+  }
+
+  useEffect(() => {
+    fetchPlayersByTeam()
+  }, [team])
 
   return (
     <Container>
@@ -92,7 +111,7 @@ export function Players() {
 
     <FlatList 
       data={players}
-      keyExtractor={item => item}
+      keyExtractor={item => item.name}
       ListEmptyComponent={() => (
         <ListEmpty 
           message="Não há pessoas neste time." 
@@ -101,7 +120,7 @@ export function Players() {
       renderItem={({ item }) => (
         <PlayerCard 
           onRemove={() => {}}
-          name={item}
+          name={item.name}
         />
       )}
       showsVerticalScrollIndicator={false}
