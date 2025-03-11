@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useRoute } from '@react-navigation/native'
 import { Alert, FlatList, TextInput } from 'react-native'
 
+import { PlayerStorageDTO } from '@storage/players/PlayerStorageDTO'
 import { playerAddByGroup } from '@storage/players/playerAddByGroup'
 import { playersGetByGroupAndTeam } from '@storage/players/playersGetByGroupAndTeam'
+import { playerRemoveByGroup } from '@storage/players/playerRemoveByGroup'
 
 import { AppError } from '@utils/AppError'
 
@@ -17,7 +19,6 @@ import { Filter } from "@components/Filter"
 import { PlayerCard } from "@components/PlayerCard"
 import { ListEmpty } from '@components/ListEmpty'
 import { Button } from '@components/Button'
-import { PlayerStorageDTO } from '@storage/players/PlayerStorageDTO'
 
 type RouteParams = {
   group: string
@@ -66,6 +67,20 @@ export function Players() {
         console.log(error)
         Alert.alert('Lista pessoas', `Não foi possível listar o time ${team}`);
       }      
+    }
+  }
+
+  async function handlePlayerRemove(playerName: string) {
+    try {
+      await playerRemoveByGroup(playerName, group)
+      await fetchPlayersByTeam()
+    } catch (error) {
+      if (error instanceof AppError) {
+        Alert.alert('Remover pessoa', error.message);
+      } else {
+        console.log(error)
+        Alert.alert('Remover pessoa', `Não foi possível remover ${playerName} da lista`);
+      }              
     }
   }
 
@@ -126,7 +141,7 @@ export function Players() {
       )}
       renderItem={({ item }) => (
         <PlayerCard 
-          onRemove={() => {}}
+          onRemove={() => handlePlayerRemove(item.name)}
           name={item.name}
         />
       )}
