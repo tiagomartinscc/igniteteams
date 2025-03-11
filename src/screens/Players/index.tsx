@@ -65,7 +65,6 @@ export function Players() {
       setIsLoading(true)
       const playersByTeam = await playersGetByGroupAndTeam(group, team)
       setPlayers(playersByTeam)
-      setIsLoading(false)
     } catch (error) {
       if (error instanceof AppError) {
         Alert.alert('Lista pessoas', error.message);
@@ -73,6 +72,8 @@ export function Players() {
         console.log(error)
         Alert.alert('Lista pessoas', `Não foi possível listar o time ${team}`);
       }      
+    } finally {
+      setIsLoading(false)
     }
   }
 
